@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { overflow-x: clip; }
+  body { font-family: 'Baloo 2', system-ui, sans-serif; background: #FFCF5A; overflow-x: clip; }
+  ::selection { background: #FF5A36; color: #fff; }
+  @keyframes solspin { to { transform: rotate(360deg); } }
+  @keyframes solpulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+  @keyframes bob2 { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-22px) rotate(2deg); } }
+  @keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(120vw); } }
+  @keyframes drift2 { from { transform: translateX(120vw); } to { transform: translateX(-40vw); } }
+  @keyframes shimmer { 0%,100% { transform: skewX(0deg) scaleY(1); opacity:.5;} 50% { transform: skewX(3deg) scaleY(1.02); opacity:.8;} }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes sway { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+  @keyframes flamewob { 0%,100% { transform: scaleY(1) translateY(0);} 50% { transform: scaleY(1.15) translateY(-4px);} }
+  @keyframes rise { 0% { transform: translateY(0) scale(.6); opacity:0; } 15%{opacity:1;} 100% { transform: translateY(-160px) scale(1); opacity:0; } }
+  @keyframes blink { 0%,92%,100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+  @keyframes wob { 0%,100%{transform:rotate(-6deg);} 50%{transform:rotate(6deg);} }
+  @keyframes emberrise { 0% { transform: translateY(20px) scale(.4); opacity:0; } 12%{opacity:1;} 100% { transform: translateY(-80vh) scale(1.1); opacity:0; } }
+  @keyframes beampulse { 0%,100% { opacity:.35; transform:scaleX(1); } 50% { opacity:.85; transform:scaleX(1.15); } }
+  @keyframes microshake { 0%,100%{transform:translate(0,0);} 20%{transform:translate(-2px,1px);} 40%{transform:translate(2px,-1px);} 60%{transform:translate(-1px,-2px);} 80%{transform:translate(1px,2px);} }
+  @keyframes flick { 0%,100%{opacity:.7;} 50%{opacity:1;} }
+  #solar-follower { position:fixed; top:0; left:0; width:74px; height:74px; z-index:60; pointer-events:none; will-change:transform; transform:translate3d(-200px,-200px,0); filter:drop-shadow(0 0 12px rgba(255,120,20,.7)); }
+  [data-px],[data-spread] { will-change:transform; }
+  .revealable { opacity: 0; transform: translateY(40px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  .revealable.seen { opacity: 1; transform: none; }
+  a { text-decoration: none; }
+
+  /* ═══════════════════════════════════════════════════════
+     RESPONSIVE — 4K / FHD / Laptop / Tablet / Phone
+     ═══════════════════════════════════════════════════════ */
+
+  /* ── NAV: hide text links when they stop fitting ── */
+  .nav-links { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  @media (max-width: 980px) { .nav-links .nav-link { display: none !important; } }
+  @media (max-width: 520px)  { .nav-links .nav-link-buy { font-size: 14px !important; padding: 7px 12px !important; } }
+
+  /* ── HERO COPY: height-aware padding so buttons always stay on screen ──
+     Key formula: never use more top padding than (viewport height − 570px).
+     570px = 80px nav + ~490px minimum content block.
+     Fallback: max(60px, ...) prevents negative values on tiny screens.         */
+  .hero-copy-pad {
+    padding: min(430px, 64vw, max(60px, calc(100vh - 570px))) 20px 40px;
+  }
+  /* Short desktop / laptop (1366×768, 1280×800, etc.) */
+  @media (max-height: 860px) {
+    .hero-copy-pad { padding-top: min(34vh, 260px) !important; }
+  }
+  /* Compact tablets, small laptops (height ≤ 700px) */
+  @media (max-height: 700px) {
+    .hero-copy-pad { padding-top: min(26vh, 180px) !important; }
+  }
+  /* Landscape phones & very short screens */
+  @media (max-height: 540px) {
+    .hero-copy-pad { padding-top: 60px !important; padding-bottom: 16px !important; }
+    #hero-track section { overflow-y: auto !important; }
+  }
+
+  /* ── HERO h1/p: scale down on short OR narrow screens ── */
+  @media (max-height: 800px) and (min-width: 768px) {
+    .hero-copy-pad h1 { font-size: clamp(38px, 6.5vw, 80px) !important; }
+    .hero-copy-pad p  { font-size: clamp(15px, 1.8vw, 20px) !important; margin-top: 12px !important; }
+  }
+  @media (max-height: 700px) {
+    .hero-copy-pad h1 { font-size: clamp(28px, 5.5vw, 64px) !important; }
+    .hero-copy-pad p  { font-size: 14px !important; margin-top: 8px !important; }
+    .hero-copy-pad > div[style*="margin-top:32px"] { margin-top: 14px !important; }
+    .hero-copy-pad button { margin-top: 12px !important; padding: 7px 12px !important; font-size: 13px !important; }
+  }
+  /* Narrow mobile: tighter paddings */
+  @media (max-width: 600px) {
+    .hero-copy-pad { padding-left: 14px !important; padding-right: 14px !important; }
+  }
+
+  /* ── STORY: single column on narrow screens ── */
+  .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+  @media (max-width: 760px) {
+    .story-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+    .story-grid > div:first-child { display: none !important; }
+  }
+
+  /* ── JOIN / COMMUNITY: stack on mobile ── */
+  .join-btns { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  @media (max-width: 520px) {
+    .join-btns a { width: 88% !important; font-size: 17px !important; padding: 13px 18px !important; justify-content: center; }
+  }
+
+  /* ── GAME section: side padding on tiny screens ── */
+  @media (max-width: 480px) {
+    #game { padding-left: 10px !important; padding-right: 10px !important; }
+  }
+</style>
+</helmet>
+
+<div style="position:relative; width:100%;">
+
+
+  <!-- ===== NAV ===== -->
+  <nav style="position:fixed; top:0; left:0; right:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:14px 28px; background:rgba(255,222,89,.86); backdrop-filter:blur(8px); border-bottom:4px solid #2B2140;">
+    <a href="#top" style="display:flex; align-items:center; gap:12px;">
+      <div style="width:44px; height:44px; border-radius:50%; background:radial-gradient(circle at 40% 35%, #FFF1A8, #FFB020 70%); border:3px solid #2B2140; box-shadow:0 0 18px #FFC93C;"></div>
+      <span style="font-family:'Luckiest Guy',cursive; font-size:28px; color:#2B2140; letter-spacing:1px;">$SOLAR</span>
+    </a>
+    <div class="nav-links">
+      <a href="#buy" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">How to Buy</a>
+      <a href="#story" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Story</a>
+      <a href="#rise" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Rise</a>
+      <a href="#chaos" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Chaos</a>
+      <a href="#game" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Play</a>
+      <a href="#join" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Community</a>
+      <a href="#buy" class="nav-link-buy" style="font-family:'Luckiest Guy',cursive; color:#fff; background:#FF5A36; padding:10px 20px; border-radius:14px; border:3px solid #2B2140; box-shadow:0 4px 0 #2B2140; letter-spacing:1px;">BUY $SOLAR</a>
+    </div>
+  </nav>
+
+  <!-- ===== HERO (pinned scroll-reveal) ===== -->
+  <div id="hero-track" style="position:relative; height:210vh;">
+  <section id="top" style="position:sticky; top:0; height:100vh; padding-top:80px; background:linear-gradient(#3FB9F0 0%, #7FD3F2 38%, #FFE08A 62%, #FFC93C 100%); overflow:hidden;">
+
+    <!-- heat shimmer overlay -->
+    <div style="position:absolute; inset:0; background:linear-gradient(transparent 55%, rgba(255,180,60,.25)); mix-blend-mode:screen; animation:shimmer 4s ease-in-out infinite; pointer-events:none;"></div>
+
+    <!-- clouds -->
+    <div style="position:absolute; top:16%; left:0; animation:drift 34s linear infinite; opacity:.9;">{{ cloud }}</div>
+    <div style="position:absolute; top:30%; left:0; animation:drift2 46s linear infinite; opacity:.75; transform:scale(.7);">{{ cloud }}</div>
+    <div style="position:absolute; top:9%; left:0; animation:drift 58s linear infinite; opacity:.6; transform:scale(.5);">{{ cloud }}</div>
+
+    <!-- THE SUN (angry character) -->
+    <div id="hero-sun" style="position:absolute; top:4%; left:50%; transform:translateX(-50%); width:min(520px,80vw); aspect-ratio:1; z-index:2;">
+      <div id="hero-sun-scale" style="position:absolute; inset:0; transform:scale(.62); opacity:.55; will-change:transform;">
+        <div style="position:absolute; inset:0; animation:bob 6s ease-in-out infinite;">
+          <div style="position:absolute; inset:-45%; background:radial-gradient(circle, rgba(255,180,40,.6), transparent 60%); animation:solpulse 4s ease-in-out infinite;"></div>
+          <img src="solar_assets/angry_sun_hero.png" alt="Angry $SOLAR sun" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 0 34px rgba(255,120,20,.6)); animation:microshake 5s ease-in-out infinite;">
+        </div>
+      </div>
+    </div>
+
+    <!-- cloud curtains that part on scroll to reveal the sun -->
+    <div id="curtain-left" style="position:absolute; top:0; right:50%; height:82%; width:80vw; z-index:4; display:flex; align-items:center; justify-content:flex-end; pointer-events:none; will-change:transform;">
+      <div style="transform:scale(4); transform-origin:right center;">{{ cloud }}</div>
+    </div>
+    <div id="curtain-right" style="position:absolute; top:0; left:50%; height:82%; width:80vw; z-index:4; display:flex; align-items:center; justify-content:flex-start; pointer-events:none; will-change:transform;">
+      <div style="transform:scale(4); transform-origin:left center;">{{ cloud }}</div>
+    </div>
+
+    <!-- hero copy -->
+    <div class="hero-copy-pad" style="position:relative; z-index:5; max-width:940px; margin:0 auto; text-align:center;">
+      <h1 style="font-family:'Luckiest Guy',cursive; font-size:clamp(52px,11vw,132px); line-height:.92; margin:0; color:#fff; text-shadow:0 6px 0 #2B2140, 0 0 40px rgba(255,120,40,.6);">IT'S GETTING<br><span style="color:#FFDE59;">HOT IN HERE</span></h1>
+      <p style="font-family:'Baloo 2'; font-weight:700; font-size:clamp(18px,2.6vw,26px); color:#2B2140; max-width:640px; margin:20px auto 0; text-shadow:0 2px 0 rgba(255,255,255,.4);">$SOLAR is the sun that's frying every chart on the planet. No shade, no chill — just pure blazing degen heat. ☀️🔥</p>
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:32px;">
+        <a href="#buy" style="font-family:'Luckiest Guy',cursive; font-size:22px; color:#fff; background:#FF5A36; padding:16px 34px; border-radius:18px; border:4px solid #2B2140; box-shadow:0 6px 0 #2B2140; letter-spacing:1px;">🚀 BUY $SOLAR</a>
+        <a href="#game" style="font-family:'Luckiest Guy',cursive; font-size:22px; color:#2B2140; background:#FFDE59; padding:16px 34px; border-radius:18px; border:4px solid #2B2140; box-shadow:0 6px 0 #2B2140; letter-spacing:1px;">🎮 PLAY GAME</a>
+      </div>
+      <!-- contract chip -->
+      <button onClick="{{ copyCa }}" style="cursor:pointer; margin-top:26px; display:inline-flex; align-items:center; gap:10px; background:rgba(43,33,64,.9); color:#FFDE59; font-family:'Baloo 2'; font-weight:700; font-size:15px; padding:10px 16px; border-radius:14px; border:3px solid #2B2140;">
+        <span style="opacity:.7;">CA:</span> <span>{{ caLabel }}</span> <span style="background:#FF5A36; color:#fff; padding:2px 8px; border-radius:8px;">{{ copyLabel }}</span>
+      </button>
+    </div>
+
+    <!-- palms + sand -->
+    <div style="position:absolute; bottom:0; left:0; right:0; z-index:3; pointer-events:none;">
+      <div style="position:absolute; bottom:40px; left:4%; transform-origin:bottom center; animation:sway 5s ease-in-out infinite;">{{ palm }}</div>
+      <div style="position:absolute; bottom:40px; right:4%; transform-origin:bottom center; animation:sway 6s ease-in-out infinite; transform:scaleX(-1);">{{ palm }}</div>
+      <div style="height:90px; background:linear-gradient(#F6CE76, #EBAE4E); border-top:5px solid #C98A34;"></div>
+    </div>
+
+    <!-- scroll cue -->
+    <div id="scroll-cue" style="position:absolute; bottom:26px; left:50%; transform:translateX(-50%); z-index:6; display:flex; flex-direction:column; align-items:center; gap:6px; color:#2B2140; font-weight:700; font-size:14px; animation:bob 2s ease-in-out infinite;">
+      <span>scroll to part the clouds ☁️</span>
+      <span style="font-size:22px;">▾</span>
+    </div>
+  </section>
+  </div>
+
+  <!-- ===== MARQUEE ===== -->
+  <div style="background:#2B2140; border-top:5px solid #FF5A36; border-bottom:5px solid #FF5A36; padding:14px 0; overflow:hidden; white-space:nowrap;">
+    <div style="display:inline-flex; animation:marquee 22s linear infinite;">
+      <span style="font-family:'Luckiest Guy',cursive; font-size:26px; color:#FFDE59;">{{ tickerText }}</span>
+      <span style="font-family:'Luckiest Guy',cursive; font-size:26px; color:#FFDE59;">{{ tickerText }}</span>
+    </div>
+  </div>
+
+  
+
+  <!-- ===== STORY ===== -->
+  <section id="story" style="position:relative; padding:110px 20px; background:linear-gradient(#3FB9F0, #8FD9F5); overflow:hidden;">
+    <div style="position:absolute; top:8%; left:0; animation:drift 40s linear infinite; opacity:.85;">{{ cloud }}</div>
+    <div class="story-grid" style="max-width:1000px; margin:0 auto; position:relative;">
+      <div class="revealable">
+        <div style="position:relative; width:min(360px,76vw); margin:0 auto; aspect-ratio:1; animation:bob2 7s ease-in-out infinite;">
+          <div style="position:absolute; inset:-30%; background:radial-gradient(circle, rgba(255,190,60,.55), transparent 62%); animation:solpulse 5s ease-in-out infinite;"></div>
+          <img src="solar_assets/angry_sun_hero.png" alt="$SOLAR sun" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 0 24px rgba(255,120,20,.5));">
+        </div>
+      </div>
+      <div class="revealable">
+        <h2 style="font-family:'Luckiest Guy',cursive; font-size:clamp(36px,6vw,64px); color:#fff; text-shadow:0 5px 0 #2B2140; margin:0 0 20px;">THE SOLAR STORY</h2>
+        <p style="font-weight:600; color:#123; font-size:19px; line-height:1.5; margin:0 0 16px;">Long ago the sun got tired of quietly warming the earth for free. It slapped on sunglasses, opened a wallet, and decided to <b>heat the charts</b> instead.</p>
+        <p style="font-weight:600; color:#123; font-size:19px; line-height:1.5; margin:0;">Now every candle it touches turns green. Diamond hands don't sweat — they tan. Welcome to the hottest coin in the galaxy. There is no roadmap to the moon; we're going straight to the sun. 🔆</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== RISE (pinned sunrise reveal) ===== -->
+  <div id="rise-track" style="position:relative; height:210vh;">
+    <section id="rise" data-screen-label="Rise" style="position:sticky; top:0; height:100vh; overflow:hidden; background:linear-gradient(#1b0c3a 0%, #5a2470 38%, #d1522a 70%, #ffb838 100%);">
+      <!-- stars -->
+      <sc-for list="{{ stars }}" as="st" hint-placeholder-count="22">
+        <div style="position:absolute; top:{{ st.top }}%; left:{{ st.left }}%; width:{{ st.s }}px; height:{{ st.s }}px; border-radius:50%; background:#fff; animation:flick {{ st.d }}s ease-in-out infinite;"></div>
+      </sc-for>
+      <!-- growing glow behind horizon -->
+      <div id="rise-glow" style="position:absolute; left:50%; bottom:6%; width:130vw; height:130vw; transform:translateX(-50%); background:radial-gradient(circle at 50% 100%, rgba(255,200,80,.8), transparent 42%); opacity:.3; pointer-events:none;"></div>
+      <!-- rising sun photo -->
+      <div id="rise-sun" style="position:absolute; left:50%; bottom:0; width:min(560px,86vw); aspect-ratio:1; transform:translateX(-50%) translateY(55vh) scale(.5); z-index:2; will-change:transform;">
+        <img src="solar_assets/angry_sun_hero.png" alt="$SOLAR rising" style="width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 0 44px rgba(255,140,30,.75)); animation:microshake 5s ease-in-out infinite;">
+      </div>
+      <!-- headline halves that part as the sun rises -->
+      <div style="position:absolute; top:15%; left:0; right:0; z-index:6; text-align:center; padding:0 16px;">
+        <div id="rise-left" style="font-family:'Luckiest Guy',cursive; font-size:clamp(38px,7.5vw,92px); color:#fff; text-shadow:0 4px 0 #2a0a24; will-change:transform;">STRAIGHT</div>
+        <div id="rise-right" style="font-family:'Luckiest Guy',cursive; font-size:clamp(52px,11vw,140px); color:#FFDE59; text-shadow:0 6px 0 #7a1a00; will-change:transform;">TO THE SUN</div>
+      </div>
+      <!-- horizon dunes -->
+      <div style="position:absolute; bottom:0; left:0; right:0; height:20%; background:linear-gradient(#c8791f,#6f350b); z-index:3; border-top:5px solid #532806;"></div>
+      <div style="position:absolute; bottom:16%; left:0; right:0; height:5%; z-index:3;"></div>
+      <!-- rising embers -->
+      <sc-for list="{{ embers }}" as="e" hint-placeholder-count="10">
+        <div style="position:absolute; bottom:16%; left:{{ e.left }}%; z-index:4;">
+          <div style="width:{{ e.size }}px; height:{{ e.size }}px; border-radius:50%; background:radial-gradient(circle,#FFF0A8,#FF6A16 60%,#E23A0E); box-shadow:0 0 10px #FF7A1A; animation:emberrise {{ e.dur }}s linear infinite; animation-delay:{{ e.delay }}s;"></div>
+        </div>
+      </sc-for>
+      <div id="rise-cue" style="position:absolute; bottom:22px; left:0; right:0; text-align:center; color:#FFE3B0; font-weight:600; font-size:14px; opacity:.85; z-index:6; animation:flick 2s ease-in-out infinite;">keep scrolling — raise the sun ☀️</div>
+    </section>
+  </div>
+
+  <!-- ===== CHAOS / ANGRY SUN ===== -->
+  <section id="chaos" style="position:relative; min-height:105vh; background:#160a1e; overflow:hidden; display:flex; align-items:center; justify-content:center; perspective:1000px;">
+
+    <!-- deep background artwork with parallax -->
+    <img data-px="34" src="solar_assets/angry_sun.jpg" alt="Angry SOLAR sun scorching the city" style="position:absolute; top:-6%; left:-6%; width:112%; height:112%; object-fit:cover;">
+
+    <!-- heat / color wash -->
+    <div style="position:absolute; inset:0; background:linear-gradient(rgba(22,10,30,.15), rgba(22,10,30,.55) 55%, rgba(255,90,20,.35)); mix-blend-mode:multiply;"></div>
+    <div style="position:absolute; inset:0; background:radial-gradient(circle at 50% 22%, rgba(255,190,60,.35), transparent 42%);"></div>
+
+    <!-- scorching beams that pulse + parallax opposite -->
+    <div data-px="-70" style="position:absolute; top:20%; left:50%; width:2px; height:80%; transform-origin:top center;">
+      <sc-for list="{{ beams }}" as="b" hint-placeholder-count="5">
+        <div style="position:absolute; top:0; left:0; width:{{ b.w }}px; height:74vh; background:linear-gradient(rgba(255,214,80,.9), rgba(255,90,20,0)); transform:rotate({{ b.rot }}deg); transform-origin:top center; animation:beampulse {{ b.dur }}s ease-in-out infinite; animation-delay:{{ b.delay }}s; filter:blur(1px);"></div>
+      </sc-for>
+    </div>
+
+    <!-- rising embers -->
+    <sc-for list="{{ embers }}" as="e" hint-placeholder-count="14">
+      <div data-px="{{ e.dpx }}" style="position:absolute; bottom:-30px; left:{{ e.left }}%;">
+        <div style="width:{{ e.size }}px; height:{{ e.size }}px; border-radius:50%; background:radial-gradient(circle,#FFF0A8,#FF6A16 60%,#E23A0E); box-shadow:0 0 12px #FF7A1A; animation:emberrise {{ e.dur }}s linear infinite; animation-delay:{{ e.delay }}s;"></div>
+      </div>
+    </sc-for>
+
+    <!-- floating $SOLAR coins, parallax foreground -->
+    <div data-px="90" style="position:absolute; top:26%; left:14%;">
+      <div style="width:56px; height:56px; border-radius:50%; background:radial-gradient(circle at 38% 34%,#FFF1A8,#F2A800); border:3px solid #B87400; display:flex; align-items:center; justify-content:center; font-family:'Luckiest Guy',cursive; color:#B87400; font-size:26px; animation:bob2 5s ease-in-out infinite;">S</div>
+    </div>
+    <div data-px="120" style="position:absolute; top:60%; right:12%;">
+      <div style="width:44px; height:44px; border-radius:50%; background:radial-gradient(circle at 38% 34%,#FFF1A8,#F2A800); border:3px solid #B87400; display:flex; align-items:center; justify-content:center; font-family:'Luckiest Guy',cursive; color:#B87400; font-size:20px; animation:bob 6s ease-in-out infinite;">S</div>
+    </div>
+
+    <!-- SPLIT HEADLINE — the two halves slide apart on mouse move -->
+    <div style="position:relative; z-index:10; text-align:center; padding:0 16px;">
+      <div data-spread="-90" style="font-family:'Luckiest Guy',cursive; font-size:clamp(46px,10vw,120px); line-height:.9; color:#fff; text-shadow:0 0 30px rgba(255,120,20,.9), 0 6px 0 #7a1a00;">THE SUN IS</div>
+      <div data-spread="90" style="font-family:'Luckiest Guy',cursive; font-size:clamp(60px,14vw,168px); line-height:.9; color:#FFDE59; text-shadow:0 0 40px rgba(255,90,20,1), 0 8px 0 #7a1a00; animation:microshake 4s ease-in-out infinite;">FURIOUS</div>
+      <p data-px="50" style="max-width:560px; margin:26px auto 30px; font-weight:700; font-size:19px; color:#FFE3B0; text-shadow:0 2px 8px rgba(0,0,0,.6);">It stopped being nice. Charts are melting, bears are running, and every red candle just got vaporized. $SOLAR is scorched earth for paper hands. 🔥</p>
+      <a href="#buy" data-px="40" style="display:inline-block; font-family:'Luckiest Guy',cursive; font-size:22px; color:#160a1e; background:#FFDE59; padding:16px 36px; border-radius:18px; border:4px solid #160a1e; box-shadow:0 6px 0 #7a1a00; letter-spacing:1px;">🔥 RIDE THE HEAT</a>
+    </div>
+
+    <!-- hint -->
+    <div style="position:absolute; bottom:22px; left:0; right:0; text-align:center; color:#FFE3B0; font-weight:600; font-size:14px; opacity:.7; animation:flick 2s ease-in-out infinite;">move your mouse — everything scatters ☀️</div>
+  </section>
+
+  <!-- ===== GAME ===== -->
+  <section id="game" style="position:relative; padding:90px 20px 110px; background:linear-gradient(#FF9E2C, #FF5A36); overflow:hidden;">
+    <div style="max-width:760px; margin:0 auto; text-align:center;">
+      <h2 class="revealable" style="font-family:'Luckiest Guy',cursive; font-size:clamp(38px,7vw,74px); color:#FFDE59; text-shadow:0 5px 0 #2B2140; margin:0 0 8px;">DODGE THE SOLAR FLARES</h2>
+      <p class="revealable" style="font-weight:700; color:#fff; font-size:19px; margin:0 0 26px;">Move your beach umbrella. Survive the heat. Grab coins. ☂️</p>
+
+      <div style="position:relative; margin:0 auto; width:min(640px,94vw); border:6px solid #2B2140; border-radius:22px; overflow:hidden; box-shadow:0 10px 0 #2B2140; background:#8FD9F5;">
+        <canvas ref="{{ canvasRef }}" width="640" height="440" style="display:block; width:100%; height:auto; touch-action:none; cursor:none;"></canvas>
+
+        <!-- HUD -->
+        <div style="position:absolute; top:12px; left:14px; right:14px; display:flex; justify-content:space-between; pointer-events:none; font-family:'Luckiest Guy',cursive; color:#2B2140; font-size:20px; text-shadow:0 2px 0 #fff;">
+          <span>🪙 {{ score }}</span>
+          <span>🏆 {{ best }}</span>
+        </div>
+
+        <!-- overlay -->
+        <sc-if value="{{ showOverlay }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(43,33,64,.72); gap:16px; padding:20px;">
+            <div style="font-family:'Luckiest Guy',cursive; font-size:clamp(28px,6vw,44px); color:#FFDE59; text-align:center; text-shadow:0 3px 0 #000;">{{ overlayTitle }}</div>
+            <div style="font-weight:700; color:#fff; font-size:17px; text-align:center; max-width:360px;">{{ overlaySub }}</div>
+            <button onClick="{{ startGame }}" style="cursor:pointer; font-family:'Luckiest Guy',cursive; font-size:24px; color:#2B2140; background:#FFDE59; padding:14px 34px; border-radius:16px; border:4px solid #2B2140; box-shadow:0 5px 0 #2B2140; letter-spacing:1px;">{{ overlayBtn }}</button>
+          </div>
+        </sc-if>
+      </div>
+      <p class="revealable" style="font-weight:600; color:#fff; font-size:15px; margin:18px 0 0; opacity:.9;">Desktop: move the mouse or use ← → keys. Mobile: drag your finger.</p>
+    </div>
+  </section>
+
+  <!-- ===== COMMUNITY / JOIN ===== -->
+  <section id="join" style="position:relative; padding:100px 20px 60px; background:linear-gradient(#FFC93C, #FFDE59); overflow:hidden;">
+    <div style="position:absolute; bottom:0; left:0; right:0; height:90px; background:linear-gradient(#F6CE76,#EBAE4E); border-top:5px solid #C98A34;"></div>
+    <div style="max-width:820px; margin:0 auto; text-align:center; position:relative; z-index:2;">
+      <div style="width:140px; height:140px; margin:0 auto 20px; position:relative; animation:bob 5s ease-in-out infinite;">
+        <img src="solar_assets/angry_sun_hero.png" alt="$SOLAR sun" style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 0 18px rgba(255,120,20,.5));">
+      </div>
+      <h2 class="revealable" style="font-family:'Luckiest Guy',cursive; font-size:clamp(38px,7vw,72px); color:#fff; text-shadow:0 5px 0 #2B2140; margin:0 0 14px;">JOIN THE HEATWAVE</h2>
+      <p class="revealable" style="font-weight:700; color:#2B2140; font-size:20px; margin:0 0 34px;">Thousands of degens are already getting a tan. Don't be the one left in the shade.</p>
+      <div class="join-btns">
+        <a href="#" style="display:flex; align-items:center; gap:10px; font-family:'Luckiest Guy',cursive; font-size:20px; color:#fff; background:#229ED9; padding:15px 28px; border-radius:16px; border:4px solid #2B2140; box-shadow:0 5px 0 #2B2140;">✈️ Telegram</a>
+        <a href="#" style="display:flex; align-items:center; gap:10px; font-family:'Luckiest Guy',cursive; font-size:20px; color:#fff; background:#2B2140; padding:15px 28px; border-radius:16px; border:4px solid #2B2140; box-shadow:0 5px 0 #000;">𝕏 Twitter</a>
+        <a href="#" style="display:flex; align-items:center; gap:10px; font-family:'Luckiest Guy',cursive; font-size:20px; color:#2B2140; background:#FF5A36; padding:15px 28px; border-radius:16px; border:4px solid #2B2140; box-shadow:0 5px 0 #2B2140;">📈 DexScreener</a>
+      </div>
+    </div>
+    <footer style="position:relative; z-index:2; text-align:center; margin-top:70px; font-weight:600; color:#5A3B1E;">
+      <div style="font-family:'Luckiest Guy',cursive; font-size:22px; color:#2B2140;">$SOLAR</div>
+      <p style="max-width:560px; margin:8px auto 0; font-size:13px; opacity:.8;">$SOLAR is a community meme coin with no intrinsic value or expectation of financial return. It is purely for entertainment. Do your own research and only ape what you can afford to lose. ☀️</p>
+    </footer>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = {
+    copied: false,
+    gameState: 'idle', // idle | playing | over
+    score: 0,
+    best: 0,
+  };
+
+  ca = '0xSOLAR000000000000000000000000000BLAZE';
+
+  componentDidMount() {
+    // best score
+    try { this.setState({ best: parseInt(localStorage.getItem('solar_best') || '0', 10) || 0 }); } catch(e){}
+
+    // scroll reveal
+    this._io = new IntersectionObserver((ents) => {
+      ents.forEach(en => { if (en.isIntersecting) en.target.classList.add('seen'); });
+    }, { threshold: 0.15 });
+    setTimeout(() => {
+      document.querySelectorAll('.revealable').forEach(el => this._io.observe(el));
+    }, 60);
+
+    this.setupGame();
+    this.setupParallax();
+  }
+
+  // ---------- PARALLAX + CURSOR FOLLOWER ----------
+  setupParallax() {
+    this._pt = { x: 0, y: 0 };              // normalized -0.5..0.5
+    this._cur = { x: -200, y: -200 };       // client coords of pointer
+    this._fol = { x: -200, y: -200 };       // eased follower position
+    this._onMove = (e) => {
+      this._pt.x = e.clientX / window.innerWidth - 0.5;
+      this._pt.y = e.clientY / window.innerHeight - 0.5;
+      this._cur.x = e.clientX; this._cur.y = e.clientY;
+    };
+    window.addEventListener('mousemove', this._onMove, { passive: true });
+
+    // scroll-driven cloud reveal
+    this._onScroll = () => {
+      const track = document.getElementById('hero-track');
+      let p = 1;
+      if (track) {
+        const max = track.offsetHeight - window.innerHeight;
+        p = max > 0 ? Math.min(1, Math.max(0, -track.getBoundingClientRect().top / max)) : 1;
+      }
+      const cp = Math.min(1, p / 0.82);          // clouds fully parted a bit before unpin
+      const ease = cp * cp * (3 - 2 * cp);        // smoothstep
+      const W = window.innerWidth;
+      const cl = document.getElementById('curtain-left');
+      const cr = document.getElementById('curtain-right');
+      const ss = document.getElementById('hero-sun-scale');
+      const cue = document.getElementById('scroll-cue');
+      const overlap = W * 0.16;                  // clouds overlap the center at rest (sun hidden)
+      if (cl) { cl.style.transform = `translateX(${(overlap - ease * W * 1.15).toFixed(1)}px) rotate(${-ease * 8}deg)`; cl.style.opacity = (1 - ease * 0.95).toFixed(2); }
+      if (cr) { cr.style.transform = `translateX(${(ease * W * 1.15 - overlap).toFixed(1)}px) rotate(${ease * 8}deg)`; cr.style.opacity = (1 - ease * 0.95).toFixed(2); }
+      if (ss) { ss.style.transform = `scale(${(0.6 + ease * 0.5).toFixed(3)})`; ss.style.opacity = (0.5 + ease * 0.5).toFixed(2); }
+      if (cue) { cue.style.opacity = (1 - cp * 1.6).toFixed(2); }
+
+      // second pinned reveal — the sunrise
+      const rt = document.getElementById('rise-track');
+      if (rt) {
+        const rmax = rt.offsetHeight - window.innerHeight;
+        const rp = rmax > 0 ? Math.min(1, Math.max(0, -rt.getBoundingClientRect().top / rmax)) : 0;
+        const re = rp * rp * (3 - 2 * rp);
+        const rs = document.getElementById('rise-sun');
+        const rl = document.getElementById('rise-left');
+        const rr = document.getElementById('rise-right');
+        const rg = document.getElementById('rise-glow');
+        const rc = document.getElementById('rise-cue');
+        if (rs) rs.style.transform = `translateX(-50%) translateY(${(55 - re * 68).toFixed(1)}vh) scale(${(0.5 + re * 0.62).toFixed(3)})`;
+        if (rl) rl.style.transform = `translateX(${(-re * W * 0.55).toFixed(1)}px) translateY(${(-re * 30).toFixed(1)}px)`;
+        if (rr) rr.style.transform = `translateX(${(re * W * 0.55).toFixed(1)}px) translateY(${(re * 20).toFixed(1)}px)`;
+        if (rg) rg.style.opacity = (0.3 + re * 0.6).toFixed(2);
+        if (rc) rc.style.opacity = (1 - re * 1.7).toFixed(2);
+      }
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+
+    const follower = document.getElementById('solar-follower');
+    const tick = () => {
+      this._pxTick = requestAnimationFrame(tick);
+      const px = this._pt.x, py = this._pt.y;
+      // depth parallax
+      document.querySelectorAll('[data-px]').forEach(el => {
+        const d = parseFloat(el.dataset.px) || 0;
+        el.style.transform = `translate3d(${-px * d}px, ${-py * d}px, 0)`;
+      });
+      // spread — halves slide apart horizontally with pointer
+      document.querySelectorAll('[data-spread]').forEach(el => {
+        const s = parseFloat(el.dataset.spread) || 0;
+        el.style.transform = `translate3d(${px * s}px, ${py * s * 0.3}px, 0)`;
+      });
+      // eased cursor follower
+      if (follower) {
+        this._fol.x += (this._cur.x - this._fol.x) * 0.12;
+        this._fol.y += (this._cur.y - this._fol.y) * 0.12;
+        const dx = this._cur.x - this._fol.x;
+        follower.style.transform = `translate3d(${this._fol.x - 37}px, ${this._fol.y - 37}px, 0) rotate(${dx * 0.4}deg)`;
+      }
+    };
+    tick();
+  }
+
+  componentWillUnmount() {
+    if (this._raf) cancelAnimationFrame(this._raf);
+    if (this._pxTick) cancelAnimationFrame(this._pxTick);
+    if (this._onMove) window.removeEventListener('mousemove', this._onMove);
+    if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
+    if (this._io) this._io.disconnect();
+  }
+
+  copyCa = () => {
+    try { navigator.clipboard.writeText(this.ca); } catch(e){}
+    this.setState({ copied: true });
+    clearTimeout(this._ct);
+    this._ct = setTimeout(() => this.setState({ copied: false }), 1400);
+  };
+
+  // ---------- GAME ----------
+  setupGame() {
+    const cv = this._canvas;
+    if (!cv) { setTimeout(() => this.setupGame(), 80); return; }
+    const ctx = cv.getContext('2d');
+    const W = cv.width, H = cv.height;
+    const g = {
+      px: W/2, py: H - 46, pw: 58, ph: 40,
+      flares: [], coins: [], t: 0, spawn: 0, cspawn: 0, speed: 1,
+      running: false, score: 0,
+    };
+    this._g = g;
+
+    const setPX = (clientX) => {
+      const r = cv.getBoundingClientRect();
+      const x = (clientX - r.left) / r.width * W;
+      g.px = Math.max(g.pw/2, Math.min(W - g.pw/2, x));
+    };
+    cv.addEventListener('mousemove', e => setPX(e.clientX));
+    cv.addEventListener('touchmove', e => { if(e.touches[0]){ setPX(e.touches[0].clientX); e.preventDefault(); } }, {passive:false});
+    this._keys = {};
+    window.addEventListener('keydown', e => { if(e.key==='ArrowLeft'||e.key==='ArrowRight') this._keys[e.key]=true; });
+    window.addEventListener('keyup', e => { this._keys[e.key]=false; });
+
+    const loop = () => {
+      this._raf = requestAnimationFrame(loop);
+      ctx.clearRect(0,0,W,H);
+      // sky
+      const sky = ctx.createLinearGradient(0,0,0,H);
+      sky.addColorStop(0,'#8FD9F5'); sky.addColorStop(1,'#FFE08A');
+      ctx.fillStyle = sky; ctx.fillRect(0,0,W,H);
+      // sun top corner
+      ctx.save(); ctx.globalAlpha=.9;
+      const sun = ctx.createRadialGradient(W-60,50,6,W-60,50,80);
+      sun.addColorStop(0,'#FFF1A8'); sun.addColorStop(1,'rgba(255,176,32,0)');
+      ctx.fillStyle=sun; ctx.beginPath(); ctx.arc(W-60,50,80,0,7); ctx.fill(); ctx.restore();
+      // sand
+      ctx.fillStyle='#EBAE4E'; ctx.fillRect(0,H-18,W,18);
+
+      if (g.running) {
+        g.t++;
+        g.speed = 1 + g.t/2600;
+        // keyboard move
+        if(this._keys['ArrowLeft']) g.px=Math.max(g.pw/2,g.px-6);
+        if(this._keys['ArrowRight']) g.px=Math.min(W-g.pw/2,g.px+6);
+
+        // spawn flares
+        g.spawn--;
+        if (g.spawn<=0) { g.flares.push({x:20+Math.random()*(W-40), y:-20, v:(2.4+Math.random()*2.2)*g.speed, r:12+Math.random()*10}); g.spawn = 34 - Math.min(20,g.t/60); }
+        // spawn coins
+        g.cspawn--;
+        if (g.cspawn<=0) { g.coins.push({x:20+Math.random()*(W-40), y:-20, v:(2+Math.random()*1.6)*g.speed, r:12}); g.cspawn = 120 + Math.random()*90; }
+      }
+
+      // draw + update flares
+      for (let i=g.flares.length-1;i>=0;i--){
+        const f=g.flares[i]; if(g.running) f.y+=f.v;
+        const fg=ctx.createRadialGradient(f.x,f.y,2,f.x,f.y,f.r);
+        fg.addColorStop(0,'#FFF3B0'); fg.addColorStop(.5,'#FF7A1A'); fg.addColorStop(1,'#E23A0E');
+        ctx.fillStyle=fg; ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,7); ctx.fill();
+        ctx.fillStyle='rgba(255,120,20,.35)'; ctx.beginPath(); ctx.arc(f.x,f.y-f.r,f.r*.7,0,7); ctx.fill();
+        if(f.y>H+30) g.flares.splice(i,1);
+        else if(g.running){
+          const dx=Math.abs(f.x-g.px), dy=Math.abs(f.y-(g.py-6));
+          if(dx<g.pw*0.34+f.r*0.5 && dy<g.ph*0.4+f.r*0.5){ this.endGame(); }
+        }
+      }
+      // coins
+      for (let i=g.coins.length-1;i>=0;i--){
+        const c=g.coins[i]; if(g.running) c.y+=c.v;
+        ctx.save(); ctx.translate(c.x,c.y);
+        const cg=ctx.createRadialGradient(-3,-3,2,0,0,c.r);
+        cg.addColorStop(0,'#FFF1A8'); cg.addColorStop(1,'#F2A800');
+        ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(0,0,c.r,0,7); ctx.fill();
+        ctx.strokeStyle='#B87400'; ctx.lineWidth=2; ctx.stroke();
+        ctx.fillStyle='#B87400'; ctx.font='bold 13px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('S',0,1);
+        ctx.restore();
+        if(c.y>H+30) g.coins.splice(i,1);
+        else if(g.running){
+          const dx=Math.abs(c.x-g.px), dy=Math.abs(c.y-(g.py-6));
+          if(dx<g.pw*0.5+c.r && dy<g.ph*0.5+c.r){ g.coins.splice(i,1); g.score+=5; this.bumpScore(); }
+        }
+      }
+
+      // survival score
+      if(g.running && g.t%6===0){ g.score+=1; this.bumpScore(); }
+
+      // player = beach umbrella
+      this.drawUmbrella(ctx, g.px, g.py);
+    };
+    loop();
+  }
+
+  drawUmbrella(ctx,x,y){
+    // pole
+    ctx.strokeStyle='#7A4B1E'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(x,y-4); ctx.lineTo(x,y+20); ctx.stroke();
+    // canopy
+    const w=30;
+    const segs=['#FF5A36','#FFDE59','#FF5A36','#FFDE59','#FF5A36'];
+    const n=segs.length;
+    for(let i=0;i<n;i++){
+      ctx.fillStyle=segs[i];
+      const a0=Math.PI + i/n*Math.PI, a1=Math.PI + (i+1)/n*Math.PI;
+      ctx.beginPath(); ctx.moveTo(x,y-4);
+      ctx.arc(x,y-4,w, a0, a1); ctx.closePath(); ctx.fill();
+    }
+    ctx.strokeStyle='#2B2140'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.arc(x,y-4,w,Math.PI,0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-w,y-4); ctx.lineTo(x+w,y-4); ctx.stroke();
+    ctx.fillStyle='#2B2140'; ctx.beginPath(); ctx.arc(x,y-4,3,0,7); ctx.fill();
+  }
+
+  bumpScore(){
+    if(this.state.score!==this._g.score) this.setState({ score: this._g.score });
+  }
+
+  startGame = () => {
+    const g=this._g; if(!g) return;
+    g.flares=[]; g.coins=[]; g.t=0; g.spawn=0; g.cspawn=60; g.speed=1; g.score=0; g.px=g && 320; g.running=true;
+    this.setState({ gameState:'playing', score:0 });
+  };
+
+  endGame(){
+    const g=this._g; g.running=false;
+    let best=this.state.best;
+    if(g.score>best){ best=g.score; try{ localStorage.setItem('solar_best',String(best)); }catch(e){} }
+    this.setState({ gameState:'over', best });
+  }
+
+  renderVals() {
+    const gs=this.state.gameState;
+    const short=this.ca.slice(0,6)+'…'+this.ca.slice(-4);
+    return {
+      caLabel: short,
+      copyLabel: this.state.copied ? 'COPIED!' : 'COPY',
+      copyCa: this.copyCa,
+      tickerText: '☀️ $SOLAR TO THE SUN  🔥  BUY THE HEAT  ☀️  NO CHILL ONLY GAINS  🔥  IT\u2019S GETTING HOT  ☀️  DIAMOND HANDS DON\u2019T SWEAT  🔥  ',
+      canvasRef: (el) => { this._canvas = el; },
+      score: this.state.score,
+      best: this.state.best,
+      startGame: this.startGame,
+      showOverlay: gs !== 'playing',
+      overlayTitle: gs==='over' ? 'YOU GOT BURNED! 🔥' : 'DODGE THE FLARES ☀️',
+      overlaySub: gs==='over'
+        ? ('You scored ' + this.state.score + ' points before the sun caught you. Grab the golden $SOLAR coins for +5!')
+        : 'Solar flares rain from the sky. Move your umbrella to survive and scoop up $SOLAR coins.',
+      overlayBtn: gs==='over' ? 'TRY AGAIN' : 'START',
+      steps: [
+        { n:'1', icon:'👛', title:'Get a Wallet', body:'Grab Phantom or MetaMask and load it with a little SOL or ETH to trade with.' },
+        { n:'2', icon:'💧', title:'Fund It Up', body:'Top up your wallet from any exchange. Enough to ape, not enough to cry.' },
+        { n:'3', icon:'🔄', title:'Swap for $SOLAR', body:'Head to the DEX, paste the contract address and swap for pure sunshine.' },
+        { n:'4', icon:'🏖️', title:'Soak It In', body:'Hold, tan, and watch the chart heat up. Welcome to the heatwave.' },
+      ],
+      cloud: React.createElement('svg',{width:200,height:80,viewBox:'0 0 200 80'},
+        React.createElement('g',{fill:'#ffffff'},
+          React.createElement('ellipse',{cx:60,cy:50,rx:52,ry:26}),
+          React.createElement('ellipse',{cx:110,cy:44,rx:44,ry:30}),
+          React.createElement('ellipse',{cx:150,cy:54,rx:40,ry:22}),
+          React.createElement('rect',{x:40,y:52,width:120,height:22,rx:11})
+        )
+      ),
+      rays: this.raysSvg(),
+      palm: this.palmSvg(),
+      sunFace: this.sunSvg(false),
+      sunFaceCool: this.sunSvg(true),
+      angrySun: this.angrySunSvg(),
+      embers: this._embers || (this._embers = Array.from({length:16}, () => ({
+        left: +(Math.random()*100).toFixed(1),
+        size: 6 + Math.round(Math.random()*14),
+        dur: +(4 + Math.random()*5).toFixed(2),
+        delay: +(-Math.random()*6).toFixed(2),
+        dpx: 30 + Math.round(Math.random()*80),
+      }))),
+      stars: this._stars || (this._stars = Array.from({length:24}, () => ({
+        top: +(Math.random()*46).toFixed(1),
+        left: +(Math.random()*100).toFixed(1),
+        s: 1 + Math.round(Math.random()*3),
+        d: +(1.4 + Math.random()*2.4).toFixed(2),
+      }))),
+      beams: [
+        { w:120, rot:-32, dur:3.2, delay:0 },
+        { w:70,  rot:-16, dur:2.6, delay:.4 },
+        { w:150, rot:0,   dur:3.8, delay:.2 },
+        { w:70,  rot:16,  dur:2.9, delay:.6 },
+        { w:120, rot:32,  dur:3.4, delay:.1 },
+      ],
+    };
+  }
+
+  raysSvg(){
+    const rays=[];
+    const N=16;
+    for(let i=0;i<N;i++){
+      const a=i/N*Math.PI*2;
+      const long=i%2===0;
+      const r1=42, r2=long?50:47;
+      rays.push(React.createElement('polygon',{key:i,
+        points:`${50+Math.cos(a-0.05)*r1},${50+Math.sin(a-0.05)*r1} ${50+Math.cos(a)*r2},${50+Math.sin(a)*r2} ${50+Math.cos(a+0.05)*r1},${50+Math.sin(a+0.05)*r1}`,
+        fill: long?'#FFB020':'#FFC93C'}));
+    }
+    return React.createElement('svg',{viewBox:'0 0 100 100',width:'100%',height:'100%'},rays);
+  }
+
+  palmSvg(){
+    return React.createElement('svg',{width:150,height:230,viewBox:'0 0 150 230'},
+      React.createElement('path',{d:'M70 230 Q64 140 78 60 L92 62 Q84 150 88 230 Z',fill:'#8A5A2B'}),
+      React.createElement('g',{fill:'#2E8B3D'},
+        React.createElement('path',{d:'M80 58 Q30 40 6 58 Q40 44 80 66 Z'}),
+        React.createElement('path',{d:'M80 58 Q140 44 150 66 Q120 46 82 64 Z'}),
+        React.createElement('path',{d:'M80 58 Q40 8 12 6 Q54 22 82 60 Z'}),
+        React.createElement('path',{d:'M80 58 Q120 8 146 10 Q104 24 82 60 Z'}),
+        React.createElement('path',{d:'M80 58 Q76 4 66 0 Q80 24 84 58 Z'})
+      ),
+      React.createElement('g',{fill:'#C9761E'},
+        React.createElement('circle',{cx:74,cy:64,r:5}),
+        React.createElement('circle',{cx:84,cy:62,r:5}),
+        React.createElement('circle',{cx:79,cy:70,r:5})
+      )
+    );
+  }
+
+  sunSvg(cool){
+    return React.createElement('svg',{viewBox:'0 0 100 100',width:'100%',height:'100%'},
+      React.createElement('defs',null,
+        React.createElement('radialGradient',{id:cool?'sgC':'sgH',cx:'40%',cy:'35%',r:'75%'},
+          React.createElement('stop',{offset:'0%',stopColor:'#FFF6C2'}),
+          React.createElement('stop',{offset:'55%',stopColor:'#FFD84D'}),
+          React.createElement('stop',{offset:'100%',stopColor:'#FF9E1F'})
+        )
+      ),
+      React.createElement('circle',{cx:50,cy:50,r:38,fill:`url(#${cool?'sgC':'sgH'})`,stroke:'#E8820E',strokeWidth:2}),
+      // sunglasses if cool, else eyes
+      cool
+        ? React.createElement('g',null,
+            React.createElement('rect',{x:26,y:40,width:20,height:14,rx:5,fill:'#2B2140'}),
+            React.createElement('rect',{x:54,y:40,width:20,height:14,rx:5,fill:'#2B2140'}),
+            React.createElement('rect',{x:44,y:44,width:12,height:3,fill:'#2B2140'}),
+            React.createElement('rect',{x:30,y:43,width:7,height:4,rx:2,fill:'#5b5470'})
+          )
+        : React.createElement('g',null,
+            React.createElement('circle',{cx:38,cy:44,r:6,fill:'#2B2140'}),
+            React.createElement('circle',{cx:62,cy:44,r:6,fill:'#2B2140'}),
+            React.createElement('circle',{cx:40,cy:42,r:2,fill:'#fff'}),
+            React.createElement('circle',{cx:64,cy:42,r:2,fill:'#fff'}),
+            // sweat drop
+            React.createElement('path',{d:'M74 40 q4 6 0 9 a4.5 4.5 0 0 1-4 -3 q1.5-3 4-6 Z',fill:'#6EC6FF',stroke:'#3AA0E0',strokeWidth:.6})
+          ),
+      // cheeks
+      React.createElement('circle',{cx:32,cy:58,r:5,fill:'#FF8A5B',opacity:.6}),
+      React.createElement('circle',{cx:68,cy:58,r:5,fill:'#FF8A5B',opacity:.6}),
+      // mouth
+      React.createElement('path',{d:cool?'M40 63 q10 8 20 0':'M38 60 q12 14 24 0 q-12 5 -24 0 Z',fill:cool?'none':'#B23A1E',stroke:'#B23A1E',strokeWidth:cool?3:1,strokeLinecap:'round'})
+    );
+  }
+
+  angrySunSvg(){
+    const rays=[];
+    const N=14;
+    for(let i=0;i<N;i++){
+      const a=i/N*Math.PI*2;
+      const r1=40,r2=50;
+      rays.push(React.createElement('polygon',{key:i,
+        points:`${50+Math.cos(a-0.06)*r1},${50+Math.sin(a-0.06)*r1} ${50+Math.cos(a)*r2},${50+Math.sin(a)*r2} ${50+Math.cos(a+0.06)*r1},${50+Math.sin(a+0.06)*r1}`,
+        fill:'#FF8A1E'}));
+    }
+    return React.createElement('svg',{viewBox:'0 0 100 100',width:'100%',height:'100%'},
+      React.createElement('defs',null,
+        React.createElement('radialGradient',{id:'ang',cx:'42%',cy:'36%',r:'70%'},
+          React.createElement('stop',{offset:'0%',stopColor:'#FFE27A'}),
+          React.createElement('stop',{offset:'60%',stopColor:'#FFB020'}),
+          React.createElement('stop',{offset:'100%',stopColor:'#F26A0E'})
+        )
+      ),
+      React.createElement('g',null,rays),
+      React.createElement('circle',{cx:50,cy:50,r:38,fill:'url(#ang)',stroke:'#C4520A',strokeWidth:2}),
+      // angry eyebrows
+      React.createElement('path',{d:'M30 40 L46 47',stroke:'#7a1a00',strokeWidth:5,strokeLinecap:'round'}),
+      React.createElement('path',{d:'M70 40 L54 47',stroke:'#7a1a00',strokeWidth:5,strokeLinecap:'round'}),
+      // eyes
+      React.createElement('circle',{cx:39,cy:50,r:5,fill:'#2B2140'}),
+      React.createElement('circle',{cx:61,cy:50,r:5,fill:'#2B2140'}),
+      // gritted mouth
+      React.createElement('path',{d:'M36 62 q14 12 28 0 q-14 -3 -28 0 Z',fill:'#7a1a00'}),
+      React.createElement('rect',{x:40,y:61,width:20,height:4,fill:'#fff'})
+    );
+  }
+}
+</script>
+</body>
+</html>
