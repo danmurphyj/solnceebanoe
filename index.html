@@ -8,6 +8,7 @@
 <body>
 <x-dc>
 <helmet>
+<link rel="icon" type="image/x-icon" href="solar_assets/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -50,19 +51,25 @@
   @media (max-width: 520px)  { .nav-links .nav-link-buy { font-size: 14px !important; padding: 7px 12px !important; } }
 
   /* ── HERO COPY: height-aware padding so buttons always stay on screen ──
-     Key formula: never use more top padding than (viewport height − 570px).
-     570px = 80px nav + ~490px minimum content block.
+     Key formula: never use more top padding than (viewport height − 680px).
+     680px = 80px nav + 90px sand-strip + ~510px content block.
      Fallback: max(60px, ...) prevents negative values on tiny screens.         */
   .hero-copy-pad {
-    padding: min(430px, 64vw, max(60px, calc(100vh - 570px))) 20px 40px;
+    padding: min(380px, 64vw, max(60px, calc(100vh - 680px))) 20px 40px;
+  }
+  /* Wide desktops at moderate height (900–960px, e.g. 1440×900, 1920×900) */
+  @media (max-height: 960px) and (min-width: 769px) {
+    .hero-copy-pad { padding-top: min(24vh, 200px) !important; }
+    .hero-copy-pad h1 { font-size: clamp(44px, 7vw, 94px) !important; line-height: .93 !important; }
+    .hero-copy-pad p  { font-size: clamp(15px, 2vw, 22px) !important; margin-top: 14px !important; }
   }
   /* Short desktop / laptop (1366×768, 1280×800, etc.) */
   @media (max-height: 860px) {
-    .hero-copy-pad { padding-top: min(34vh, 260px) !important; }
+    .hero-copy-pad { padding-top: min(26vh, 180px) !important; }
   }
   /* Compact tablets, small laptops (height ≤ 700px) */
   @media (max-height: 700px) {
-    .hero-copy-pad { padding-top: min(26vh, 180px) !important; }
+    .hero-copy-pad { padding-top: min(22vh, 140px) !important; }
   }
   /* Landscape phones & very short screens */
   @media (max-height: 540px) {
@@ -103,6 +110,69 @@
   @media (max-width: 480px) {
     #game { padding-left: 10px !important; padding-right: 10px !important; }
   }
+
+  /* ══════════════════════════════════════════════════════════
+     PHONE HERO FIX — portrait phones ≤ 768 px wide
+     The height-only media queries above can push content below
+     the sand strip (overflow:hidden clips it). These width-based
+     rules take priority and guarantee everything stays visible.
+     ══════════════════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+    /* Safe top padding: grows with viewport height but is capped
+       so the CTA buttons never disappear behind the sand strip   */
+    .hero-copy-pad {
+      padding-top: clamp(70px, calc(100vh - 600px), 200px) !important;
+      padding-bottom: 20px !important;
+    }
+    /* Shrink the decorative sun so text has more breathing room  */
+    #hero-sun { width: min(260px, 60vw) !important; }
+    /* One size smaller headline on phones                        */
+    .hero-copy-pad h1 {
+      font-size: clamp(28px, 9vw, 56px) !important;
+      line-height: .95 !important;
+    }
+    /* Tighter paragraph                                          */
+    .hero-copy-pad p {
+      font-size: clamp(13px, 3.8vw, 17px) !important;
+      margin-top: 10px !important;
+      max-width: 100% !important;
+    }
+    /* CTA button row                                             */
+    .hero-copy-pad > div {
+      margin-top: 14px !important;
+      gap: 10px !important;
+    }
+    .hero-copy-pad > div a {
+      font-size: 15px !important;
+      padding: 11px 18px !important;
+      border-width: 3px !important;
+      border-radius: 14px !important;
+    }
+    /* CA copy chip                                               */
+    .hero-copy-pad > button {
+      margin-top: 12px !important;
+      font-size: 12px !important;
+      padding: 7px 12px !important;
+    }
+  }
+
+  /* Very narrow phones ≤ 380 px                                 */
+  @media (max-width: 380px) {
+    .hero-copy-pad h1 { font-size: clamp(24px, 7.5vw, 38px) !important; }
+    .hero-copy-pad > div a { font-size: 14px !important; padding: 9px 14px !important; }
+  }
+
+  /* ── SCROLL CUE: центровка через left:0/right:0, а не через transform,
+     потому что анимация bob перезаписывает translateX(-50%) каждый кадр ── */
+  #scroll-cue {
+    left: 0 !important;
+    right: 0 !important;
+    text-align: center;
+    white-space: nowrap;
+  }
+  @media (max-width: 480px) {
+    #scroll-cue { font-size: 11px !important; bottom: 18px !important; }
+  }
 </style>
 </helmet>
 
@@ -112,17 +182,15 @@
   <!-- ===== NAV ===== -->
   <nav style="position:fixed; top:0; left:0; right:0; z-index:50; display:flex; align-items:center; justify-content:space-between; padding:14px 28px; background:rgba(255,222,89,.86); backdrop-filter:blur(8px); border-bottom:4px solid #2B2140;">
     <a href="#top" style="display:flex; align-items:center; gap:12px;">
-      <div style="width:44px; height:44px; border-radius:50%; background:radial-gradient(circle at 40% 35%, #FFF1A8, #FFB020 70%); border:3px solid #2B2140; box-shadow:0 0 18px #FFC93C;"></div>
+      <img src="solar_assets/angry_sun_hero.png" alt="$SOLAR" style="width:44px; height:44px; object-fit:contain; filter:drop-shadow(0 0 8px rgba(255,140,20,.7));">
       <span style="font-family:'Luckiest Guy',cursive; font-size:28px; color:#2B2140; letter-spacing:1px;">$SOLAR</span>
     </a>
     <div class="nav-links">
-      <a href="#buy" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">How to Buy</a>
       <a href="#story" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Story</a>
-      <a href="#rise" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Rise</a>
       <a href="#chaos" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Chaos</a>
       <a href="#game" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Play</a>
       <a href="#join" class="nav-link" style="font-weight:700; color:#2B2140; padding:8px 14px; border-radius:12px;">Community</a>
-      <a href="#buy" class="nav-link-buy" style="font-family:'Luckiest Guy',cursive; color:#fff; background:#FF5A36; padding:10px 20px; border-radius:14px; border:3px solid #2B2140; box-shadow:0 4px 0 #2B2140; letter-spacing:1px;">BUY $SOLAR</a>
+      <a href="https://swap.pump.fun/?input=So11111111111111111111111111111111111111112&output=C2Mm3bte5Sx45LURF2jx4eZgMqEdDtDYfuEKFyZrpump" class="nav-link-buy" style="font-family:'Luckiest Guy',cursive; color:#fff; background:#FF5A36; padding:10px 20px; border-radius:14px; border:3px solid #2B2140; box-shadow:0 4px 0 #2B2140; letter-spacing:1px;">BUY $SOLAR</a>
     </div>
   </nav>
 
@@ -158,10 +226,10 @@
 
     <!-- hero copy -->
     <div class="hero-copy-pad" style="position:relative; z-index:5; max-width:940px; margin:0 auto; text-align:center;">
-      <h1 style="font-family:'Luckiest Guy',cursive; font-size:clamp(52px,11vw,132px); line-height:.92; margin:0; color:#fff; text-shadow:0 6px 0 #2B2140, 0 0 40px rgba(255,120,40,.6);">IT'S GETTING<br><span style="color:#FFDE59;">HOT IN HERE</span></h1>
+      <h1 style="font-family:'Luckiest Guy',cursive; font-size:clamp(52px,11vw,132px); line-height:.92; margin:0; color:#fff; text-shadow:0 6px 0 #2B2140, 0 0 40px rgba(255,120,40,.6);">$SOLAR<br><span style="color:#FFDE59;">HEAT OVERKILL</span></h1>
       <p style="font-family:'Baloo 2'; font-weight:700; font-size:clamp(18px,2.6vw,26px); color:#2B2140; max-width:640px; margin:20px auto 0; text-shadow:0 2px 0 rgba(255,255,255,.4);">$SOLAR is the sun that's frying every chart on the planet. No shade, no chill — just pure blazing degen heat. ☀️🔥</p>
       <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:32px;">
-        <a href="#buy" style="font-family:'Luckiest Guy',cursive; font-size:22px; color:#fff; background:#FF5A36; padding:16px 34px; border-radius:18px; border:4px solid #2B2140; box-shadow:0 6px 0 #2B2140; letter-spacing:1px;">🚀 BUY $SOLAR</a>
+        <a href="https://swap.pump.fun/?input=So11111111111111111111111111111111111111112&output=C2Mm3bte5Sx45LURF2jx4eZgMqEdDtDYfuEKFyZrpump" style="font-family:'Luckiest Guy',cursive; font-size:22px; color:#fff; background:#FF5A36; padding:16px 34px; border-radius:18px; border:4px solid #2B2140; box-shadow:0 6px 0 #2B2140; letter-spacing:1px;">🚀 BUY $SOLAR</a>
         <a href="#game" style="font-family:'Luckiest Guy',cursive; font-size:22px; color:#2B2140; background:#FFDE59; padding:16px 34px; border-radius:18px; border:4px solid #2B2140; box-shadow:0 6px 0 #2B2140; letter-spacing:1px;">🎮 PLAY GAME</a>
       </div>
       <!-- contract chip -->
@@ -178,10 +246,6 @@
     </div>
 
     <!-- scroll cue -->
-    <div id="scroll-cue" style="position:absolute; bottom:26px; left:50%; transform:translateX(-50%); z-index:6; display:flex; flex-direction:column; align-items:center; gap:6px; color:#2B2140; font-weight:700; font-size:14px; animation:bob 2s ease-in-out infinite;">
-      <span>scroll to part the clouds ☁️</span>
-      <span style="font-size:22px;">▾</span>
-    </div>
   </section>
   </div>
 
@@ -316,7 +380,7 @@
   </section>
 
   <!-- ===== COMMUNITY / JOIN ===== -->
-  <section id="join" style="position:relative; padding:100px 20px 60px; background:linear-gradient(#FFC93C, #FFDE59); overflow:hidden;">
+  <section id="join" style="position:relative; padding:100px 20px 106px; background:linear-gradient(#FFC93C, #FFDE59); overflow:hidden;">
     <div style="position:absolute; bottom:0; left:0; right:0; height:90px; background:linear-gradient(#F6CE76,#EBAE4E); border-top:5px solid #C98A34;"></div>
     <div style="max-width:820px; margin:0 auto; text-align:center; position:relative; z-index:2;">
       <div style="width:140px; height:140px; margin:0 auto 20px; position:relative; animation:bob 5s ease-in-out infinite;">
@@ -325,8 +389,8 @@
       <h2 class="revealable" style="font-family:'Luckiest Guy',cursive; font-size:clamp(38px,7vw,72px); color:#fff; text-shadow:0 5px 0 #2B2140; margin:0 0 14px;">JOIN THE HEATWAVE</h2>
       <p class="revealable" style="font-weight:700; color:#2B2140; font-size:20px; margin:0 0 34px;">Thousands of degens are already getting a tan. Don't be the one left in the shade.</p>
       <div class="join-btns">
-        <a href="#" style="display:flex; align-items:center; gap:10px; font-family:'Luckiest Guy',cursive; font-size:20px; color:#fff; background:#229ED9; padding:15px 28px; border-radius:16px; border:4px solid #2B2140; box-shadow:0 5px 0 #2B2140;">✈️ Telegram</a>
-        <a href="#" style="display:flex; align-items:center; gap:10px; font-family:'Luckiest Guy',cursive; font-size:20px; color:#fff; background:#2B2140; padding:15px 28px; border-radius:16px; border:4px solid #2B2140; box-shadow:0 5px 0 #000;">𝕏 Twitter</a>
+        <a href="https://t.me/SOLAR_solmeme" style="display:flex; align-items:center; gap:10px; font-family:'Luckiest Guy',cursive; font-size:20px; color:#fff; background:#229ED9; padding:15px 28px; border-radius:16px; border:4px solid #2B2140; box-shadow:0 5px 0 #2B2140;">✈️ Telegram</a>
+        <a href="https://x.com/SOLAR_solmeme" style="display:flex; align-items:center; gap:10px; font-family:'Luckiest Guy',cursive; font-size:20px; color:#fff; background:#2B2140; padding:15px 28px; border-radius:16px; border:4px solid #2B2140; box-shadow:0 5px 0 #000;">𝕏 Twitter</a>
         <a href="#" style="display:flex; align-items:center; gap:10px; font-family:'Luckiest Guy',cursive; font-size:20px; color:#2B2140; background:#FF5A36; padding:15px 28px; border-radius:16px; border:4px solid #2B2140; box-shadow:0 5px 0 #2B2140;">📈 DexScreener</a>
       </div>
     </div>
@@ -347,7 +411,7 @@ class Component extends DCLogic {
     best: 0,
   };
 
-  ca = '0xSOLAR000000000000000000000000000BLAZE';
+  ca = 'C2Mm3bte5Sx45LURF2jx4eZgMqEdDtDYfuEKFyZrpump';
 
   componentDidMount() {
     // best score
